@@ -51,4 +51,6 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-# third-party
+# Custom settings
+.vscode/
+third-party/
