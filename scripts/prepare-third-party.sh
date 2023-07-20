@@ -71,9 +71,9 @@ build_rootfs() {
 
     cp -r _install/* mnt
     mkdir -p mnt/mnt
-    mkdir -p /dev
-    mkdir -p /sys
-    mkdir -p /proc
+    mkdir -p mnt/dev
+    mkdir -p mnt/sys
+    mkdir -p mnt/proc
 
     touch mnt/bin/init.sh
     chmod +x mnt/bin/init.sh
