@@ -3,7 +3,7 @@
 set -e
 
 # Setup the versions of linux kernel and busybox to use
-kernel_version=5.4.249
+kernel_version=5.4.251
 busybox_version=1.36.1
 
 kernel_url=https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-${kernel_version}.tar.xz
@@ -45,31 +45,41 @@ download_and_extract_tarballs() {
 
 build_kernel() {
     pushd ${third_party_dir}/linux-${kernel_version}
-    ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} make O=build defconfig
-    cp build/.config build/.config.old
-    echo "CONFIG_DEBUG_INFO=y" >>build/.config
-    echo "CONFIG_GDB_SCRIPTS=y" >>build/.config
-    ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} make O=build -j$(nproc)
+
+    local config_target="noneconfig"
+    case "$ARCH" in
+    arm)
+        config_target=vexpress_defconfig
+        ;;
+    riscv)
+        config_target=defconfig
+        ;;
+    esac
+
+    ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} make O=build-${ARCH} ${config_target}
+    echo "CONFIG_DEBUG_INFO=y" >>build-${ARCH}/.config
+    echo "CONFIG_GDB_SCRIPTS=y" >>build-${ARCH}/.config
+    ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} make O=build-${ARCH} -j$(nproc)
     popd
 }
 
 build_busybox() {
     pushd ${third_party_dir}/busybox-${busybox_version}
-    ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} make defconfig
-    cp .config .config.old
-    echo "CONFIG_STATIC=y" >>.config
+    mkdir -p build-${ARCH}
+    ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} make O=build-${ARCH} defconfig
+    echo "CONFIG_STATIC=y" >>build-${ARCH}/.config
     popd
 }
 
 build_rootfs() {
     pushd ${third_party_dir}/busybox-${busybox_version}
-    ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} make install
-    dd if=/dev/zero of=rootfs.ext4 bs=4M count=32
+    ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} make O=build-${ARCH} install
+    dd if=/dev/zero of=rootfs.ext4 bs=1M count=64
     mkfs.ext4 rootfs.ext4
     mkdir -p mnt
     guestmount -a rootfs.ext4 -m /dev/sda mnt
 
-    cp -r _install/* mnt
+    cp -r build-${ARCH}/_install/* mnt
     mkdir -p mnt/mnt
     mkdir -p mnt/dev
     mkdir -p mnt/sys
@@ -80,12 +90,14 @@ build_rootfs() {
 
     cat <<EOF >mnt/bin/init.sh
 #!/bin/sh
+mount -t devtmpfs none /dev
 mount -t sysfs none /sys
 mount -t proc none /proc
-mount -t 9p lddtsrc /mnt
+mount -t 9p lddt /mnt
 
 /bin/sh
 EOF
+    sync
     guestunmount mnt
     mv rootfs.ext4 ..
     popd
