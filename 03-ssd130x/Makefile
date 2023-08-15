@@ -1,7 +1,10 @@
 ARCH ?= riscv
 CROSS_COMPILE ?= riscv64-linux-gnu-
 
-obj-m := hello_world.o
+obj-m := ssd130x.o
+ssd130x-objs += main.o font.o commands.o
+
+ccflags-y = -march=armv7-a
 
 KDIR ?= $(shell realpath $$(find ../third-party -maxdepth 1 -name linux*))/build-$(ARCH)
 

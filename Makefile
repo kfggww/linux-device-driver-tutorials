@@ -19,7 +19,7 @@ ifeq ($(ARCH), arm)
 	console_name = ttyAMA0
 	QEMU_OPTIONS += -dtb $(dtb_file)
 else ifeq ($(ARCH), riscv)
-	QEMU = qemu-system-riscv
+	QEMU = qemu-system-riscv64
 	machine_type = virt
 	console_name = ttyS0
 else
