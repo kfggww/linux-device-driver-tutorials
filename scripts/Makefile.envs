@@ -1,0 +1,19 @@
+PROJECT_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/..)
+
+ifeq ($(P), arm)
+export ARCH = arm
+export CROSS_COMPILE = arm-linux-gnueabihf-
+
+else ifeq ($(P), riscv)
+export ARCH = riscv
+export CROSS_COMPILE = riscv64-linux-gnu-
+
+else
+$(error Only support "arm" or "riscv")
+
+endif
+
+KDIR = $(shell find $(PROJECT_DIR)/third-party -maxdepth 1 -name linux-*)/build-$(ARCH)
+BBOXDIR = $(shell find $(PROJECT_DIR)/third-party -maxdepth 1 -name busybox-*)/build-$(ARCH)
+
+export SHELL=/bin/bash

@@ -2,21 +2,30 @@
 
 set -e
 
-# Setup the versions of linux kernel and busybox to use
-kernel_version=5.4.251
-busybox_version=1.36.1
+# The versions of linux kernel and busybox to use
+if [ -n "${KERNEL_VERSION}" ]; then
+    kernel_version=${KERNEL_VERSION}
+else
+    kernel_version=5.4.251
+fi
+if [ -n "${BUSYBOX_VERSION}" ]; then
+    busybox_version=${BUSYBOX_VERSION}
+else
+    busybox_version=1.36.1
+fi
 
 kernel_url=https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-${kernel_version}.tar.xz
 busybox_url=https://busybox.net/downloads/busybox-${busybox_version}.tar.bz2
 
-# Setup the path
+# Setup directories
 project_dir=$(realpath $(dirname ${BASH_SOURCE[0]})/..)
 third_party_dir=$project_dir/third-party
+downloads_dir=$third_party_dir/.downloads
 
 download_and_extract_tarballs() {
-    mkdir -p $third_party_dir/.tmp
+    mkdir -p $downloads_dir
 
-    pushd $third_party_dir/.tmp
+    pushd $downloads_dir
 
     echo "Start downloading tarballs..."
     if [ ! -e linux-${kernel_version}.tar.xz ]; then
@@ -103,7 +112,9 @@ EOF
     popd
 }
 
-download_and_extract_tarballs
-build_kernel
-build_busybox
-build_rootfs
+prepare_all() {
+    download_and_extract_tarballs
+    build_kernel
+    build_busybox
+    build_rootfs
+}

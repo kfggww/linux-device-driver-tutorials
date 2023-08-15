@@ -1,0 +1,10 @@
+modules:
+	$(MAKE) -C $(KDIR) M=$(PWD) modules
+
+clean:
+	$(MAKE) -C $(KDIR) M=$(PWD) clean
+
+%:
+	$(MAKE) -C $(PROJECT_DIR) $@
+
+.PHONY: modules clean
