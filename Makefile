@@ -5,7 +5,7 @@ include scripts/Makefile.envs
 QEMU_OPTIONS = -machine $(machine_type) \
 			   -smp 4 \
 			   -kernel $(KDIR)/arch/$(ARCH)/boot/zImage \
-			   -drive file=$(PROJECT_DIR)/third-party/rootfs.ext4,format=raw,id=hda \
+			   -drive file=$(PROJECT_DIR)/third-party/rootfs.ext4,format=raw,if=none,id=hda \
 			   -device virtio-blk-device,drive=hda \
 			   -fsdev local,id=lddt,path=$(PROJECT_DIR),security_model=passthrough \
 			   -device virtio-9p-device,fsdev=lddt,mount_tag=lddt \

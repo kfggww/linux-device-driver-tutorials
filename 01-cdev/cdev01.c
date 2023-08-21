@@ -10,7 +10,7 @@ MODULE_AUTHOR("junan <kfggww@outlook.com>");
 MODULE_DESCRIPTION(
 	"cdev01: Basic char device, write(read) data to(from) a ring buffer in kernel module.");
 
-static struct cdev01 {
+static struct mycdev {
 	struct cdev cdev;
 	void *rbuf;
 	int read_ptr;
