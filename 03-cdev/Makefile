@@ -7,5 +7,8 @@ endif
 obj-m = cdev03.o
 CFLAGS_cdev03.o += -g
 
-poll_reader: poll_reader.c
+%_reader: %_reader.c
 	$(CROSS_COMPILE)gcc -static $< -o $@
+
+uclean:
+	rm -rf *reader

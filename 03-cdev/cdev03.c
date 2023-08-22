@@ -18,6 +18,7 @@ MODULE_DESCRIPTION("cdev03: block and non-block IO");
 struct mycdev {
 	struct cdev cdev;
 	struct class *cls;
+	struct fasync_struct *fa;
 	char *buf;
 	char *buf_end;
 	char *rptr;
@@ -131,6 +132,7 @@ static ssize_t cdev03_write(struct file *filp, const char __user *ubuf,
 
 	if (space_used() > 0) {
 		wake_up_interruptible(&read_queue);
+		kill_fasync(&cdev03->fa, SIGIO, POLL_IN);
 	}
 
 	mutex_unlock(&cdev03_lock);
@@ -162,10 +164,22 @@ static __poll_t cdev03_poll(struct file *filp,
 	return mask;
 }
 
+static int cdev03_fasync(int fd, struct file *filp, int on)
+{
+	return fasync_helper(fd, filp, on, &cdev03->fa);
+}
+
+static int cdev03_close(struct inode *inode, struct file *filp)
+{
+	return fasync_helper(-1, filp, 0, &cdev03->fa);
+}
+
 static struct file_operations cdev03_fops = {
 	.read = cdev03_read,
 	.write = cdev03_write,
 	.poll = cdev03_poll,
+	.fasync = cdev03_fasync,
+	.release = cdev03_close,
 };
 
 static int __init cdev03_init(void)
@@ -184,6 +198,8 @@ static int __init cdev03_init(void)
 			ret = -EINVAL;
 			goto err2;
 		}
+
+		cdev03->fa = NULL;
 
 		cdev03->buf = kmalloc(rbuf_max_size, GFP_KERNEL);
 		if (cdev03->buf == NULL) {
