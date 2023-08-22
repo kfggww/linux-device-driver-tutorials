@@ -4,5 +4,8 @@ ifeq ($(KERNELRELEASE), )
 	include ../scripts/Makefile.rules
 endif
 
-obj-m = cdev01.o
-CFLAGS_cdev01.o += -g
+obj-m = cdev03.o
+CFLAGS_cdev03.o += -g
+
+poll_reader: poll_reader.c
+	$(CROSS_COMPILE)gcc -static $< -o $@
