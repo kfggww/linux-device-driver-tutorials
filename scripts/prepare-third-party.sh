@@ -108,7 +108,7 @@ mount -t 9p lddt /mnt
 EOF
     sync
     guestunmount mnt
-    mv rootfs.ext4 ..
+    mv rootfs.ext4 ../rootfs-${ARCH}.ext4
     popd
 }
 

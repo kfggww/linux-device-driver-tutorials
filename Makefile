@@ -3,9 +3,9 @@ include scripts/Makefile.envs
 
 # options that qemu use when start the guest machine
 QEMU_OPTIONS = -machine $(machine_type) \
-			   -smp 4 \
-			   -kernel $(KDIR)/arch/$(ARCH)/boot/zImage \
-			   -drive file=$(PROJECT_DIR)/third-party/rootfs.ext4,format=raw,if=none,id=hda \
+			   -smp cpus=4 \
+			   -kernel $(kernel_image) \
+			   -drive file=$(PROJECT_DIR)/third-party/rootfs-$(ARCH).ext4,format=raw,if=none,id=hda \
 			   -device virtio-blk-device,drive=hda \
 			   -fsdev local,id=lddt,path=$(PROJECT_DIR),security_model=passthrough \
 			   -device virtio-9p-device,fsdev=lddt,mount_tag=lddt \
@@ -17,11 +17,13 @@ QEMU = qemu-system-arm
 machine_type = vexpress-a9
 dtb_file = $(KDIR)/arch/$(ARCH)/boot/dts/vexpress-v2p-ca9.dtb
 console_name = ttyAMA0
+kernel_image = $(KDIR)/arch/$(ARCH)/boot/zImage
 QEMU_OPTIONS += -dtb $(dtb_file)
 else ifeq ($(ARCH), riscv)
 QEMU = qemu-system-riscv64
 machine_type = virt
 console_name = ttyS0
+kernel_image = $(KDIR)/arch/$(ARCH)/boot/Image
 else
 $(error Only support "arm" or "riscv")
 endif
