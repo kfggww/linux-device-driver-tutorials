@@ -57,6 +57,9 @@ static int ssd1306_write_data_batch(struct i2c_client *cli,
 
 static void ssd1306_init(struct i2c_client *cli)
 {
+	/* Display off */
+	ssd1306_write_cmd(cli, 0xAE);
+
 	/* MUX ratio */
 	ssd1306_write_cmd(cli, 0xA8);
 	ssd1306_write_cmd(cli, 0x3F);
@@ -76,7 +79,7 @@ static void ssd1306_init(struct i2c_client *cli)
 
 	/* COM pins hardware configuration */
 	ssd1306_write_cmd(cli, 0xDA);
-	ssd1306_write_cmd(cli, 0x02);
+	ssd1306_write_cmd(cli, 0x12);
 
 	/* Memory addressing mode: horizontal mode */
 	ssd1306_write_cmd(cli, 0x20);
@@ -84,7 +87,7 @@ static void ssd1306_init(struct i2c_client *cli)
 
 	/* Contrast control */
 	ssd1306_write_cmd(cli, 0x81);
-	ssd1306_write_cmd(cli, 0x7F);
+	ssd1306_write_cmd(cli, 0xFF);
 
 	/* Disable entire display on */
 	ssd1306_write_cmd(cli, 0xA4);
@@ -99,6 +102,9 @@ static void ssd1306_init(struct i2c_client *cli)
 	/* Enable charge pump regulator */
 	ssd1306_write_cmd(cli, 0x8D);
 	ssd1306_write_cmd(cli, 0x14);
+
+	/* Disable scroll */
+	ssd1306_write_cmd(cli, 0x2E);
 
 	/* Display on */
 	ssd1306_write_cmd(cli, 0xAF);
