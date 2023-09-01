@@ -85,6 +85,16 @@ static void ssd1306_init(struct i2c_client *cli)
 	ssd1306_write_cmd(cli, 0x20);
 	ssd1306_write_cmd(cli, 0x00);
 
+	/* Set column address */
+	ssd1306_write_cmd(cli, 0x21);
+	ssd1306_write_cmd(cli, 0x00);
+	ssd1306_write_cmd(cli, 0x7F);
+
+	/* Set page address */
+	ssd1306_write_cmd(cli, 0x22);
+	ssd1306_write_cmd(cli, 0x00);
+	ssd1306_write_cmd(cli, 0x07);
+
 	/* Contrast control */
 	ssd1306_write_cmd(cli, 0x81);
 	ssd1306_write_cmd(cli, 0xFF);
@@ -108,6 +118,12 @@ static void ssd1306_init(struct i2c_client *cli)
 
 	/* Display on */
 	ssd1306_write_cmd(cli, 0xAF);
+
+	/* Fill the ram data */
+	int i;
+	for (i = 0; i < 128 * 8; i++) {
+		ssd1306_write_data(cli, 0x00);
+	}
 }
 
 static void ssd1306_deinit(struct i2c_client *cli)

@@ -6,6 +6,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#define FRAME_SIZE (128 * 8)
+
 int main(int argc, char **argv)
 {
 	int device_fd = open("/dev/ssd130x0", O_WRONLY);
@@ -13,19 +15,12 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	int video_fd = open(argv[1], O_RDONLY);
-	if (video_fd < 0) {
-		return -1;
-	}
+	char *frame = malloc(FRAME_SIZE);
+	memset(frame, 0x88, FRAME_SIZE);
+	write(device_fd, frame, FRAME_SIZE);
+	sleep(2);
 
-	char *frame = malloc(128 * 8);
-	memset(frame, 0, 128 * 8);
-
-	while (read(video_fd, frame, 128 * 8) > 0) {
-		write(device_fd, frame, 128 * 8);
-	}
-
-	close(video_fd);
+	free(frame);
 	close(device_fd);
 	return 0;
 }
